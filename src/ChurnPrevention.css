@@ -1,0 +1,523 @@
+.cp-page {
+  display: grid;
+  gap: 20px;
+  color: var(--text-primary, #26364d);
+}
+
+.cp-notice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 14px 17px;
+  border: 1px solid #dce6f3;
+  border-radius: 10px;
+  background: #f4f8fd;
+  font-size: 12px;
+  color: #53657d;
+}
+
+.cp-notice strong { color: #315b91; }
+
+.cp-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cp-metric, .cp-panel {
+  min-width: 0;
+  padding: 18px;
+  background: var(--panel-background, #fff);
+  border: 1px solid var(--border-color, #e8edf3);
+  border-radius: 12px;
+}
+
+.cp-metric {
+  display: grid;
+  gap: 10px;
+  border-top: 3px solid #8798ad;
+}
+
+.cp-metric span { color: #778499; font-size: 12px; }
+.cp-metric strong { font-size: 28px; color: #26364d; }
+.cp-high { border-top-color: #d86b70; }
+.cp-open { border-top-color: #d49a35; }
+.cp-contact { border-top-color: #647fba; }
+.cp-success { border-top-color: #29966d; }
+
+.cp-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.cp-heading h2 { margin: 0 0 5px; font-size: 17px; }
+.cp-heading p { margin: 0; color: #8793a4; font-size: 12px; }
+
+.cp-filters {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.2fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.cp-filters input, .cp-filters select,
+.cp-form-grid input, .cp-form-grid select,
+.cp-form-grid textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--border-color, #dfe5ed);
+  border-radius: 8px;
+  background: var(--panel-background, #fff);
+  color: var(--text-primary, #26364d);
+  font: inherit;
+  font-size: 12px;
+}
+
+.cp-table-wrap { overflow-x: auto; }
+.cp-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+
+.cp-table th {
+  padding: 12px 10px;
+  color: #8290a3;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  white-space: nowrap;
+}
+
+.cp-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border-color, #edf0f4);
+  vertical-align: middle;
+}
+
+.cp-table tbody tr.selected { background: var(--hover-bg, #f3f6fa); }
+
+.cp-id {
+  font-family: monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.cp-recommendation { min-width: 180px; max-width: 260px; }
+
+.cp-risk, .cp-status {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cp-risk-high { color: #a63840; background: #fcebed; }
+.cp-risk-medium { color: #946317; background: #fff4dc; }
+.cp-risk-low { color: #23734f; background: #e6f5ed; }
+.cp-status { color: #52647c; background: #eef2f7; }
+
+.cp-select-button, .cp-close {
+  padding: 8px 11px;
+  border: 1px solid #d8e0eb;
+  border-radius: 7px;
+  background: #f7f9fc;
+  color: #34577f;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cp-select-button:hover, .cp-close:hover { background: #edf3fa; }
+
+.cp-empty {
+  padding: 25px !important;
+  text-align: center;
+  color: #8793a4;
+}
+
+.cp-customer-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 25px;
+  padding: 13px;
+  margin-bottom: 17px;
+  border-radius: 8px;
+  background: #f7f9fc;
+  font-size: 12px;
+  color: #718096;
+}
+
+.cp-customer-info strong { color: #26364d; }
+
+.cp-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cp-form-grid label {
+  display: grid;
+  gap: 7px;
+  color: #66758a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp-form-grid .cp-notes { grid-column: 1 / -1; }
+.cp-form-grid textarea { resize: vertical; }
+
+.cp-saved {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0 0;
+  color: #64806f;
+  font-size: 11px;
+}
+
+.cp-saved span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #29966d;
+}
+
+.cp-message {
+  padding: 20px;
+  border-radius: 10px;
+  background: var(--panel-background, #fff);
+}
+
+.cp-error { color: #b42318; }
+
+@media (max-width: 900px) {
+  .cp-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cp-filters { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .cp-summary, .cp-form-grid { grid-template-columns: 1fr; }
+  .cp-form-grid .cp-notes { grid-column: auto; }
+}
+
+/* Engagement und Retention-Erweiterung */
+.cp-critical { border-top-color: #9b3545; }
+.cp-engagement-high { border-top-color: #29966d; }
+.cp-engagement-medium { border-top-color: #d49a35; }
+.cp-engagement-low { border-top-color: #8798ad; }
+
+.cp-segment,
+.cp-priority {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cp-segment-high {
+  color: #23734f;
+  background: #e6f5ed;
+}
+
+.cp-segment-medium {
+  color: #946317;
+  background: #fff4dc;
+}
+
+.cp-segment-low {
+  color: #52647c;
+  background: #eef2f7;
+}
+
+.cp-priority-critical {
+  color: #a63840;
+  background: #fcebed;
+  font-weight: 700;
+}
+
+.cp-priority-high {
+  color: #a45c20;
+  background: #fff0df;
+}
+
+.cp-priority-medium {
+  color: #946317;
+  background: #fff4dc;
+}
+
+.cp-priority-low {
+  color: #23734f;
+  background: #e6f5ed;
+}
+
+.cp-score-max {
+  color: #8793a4;
+  font-size: 10px;
+}
+
+@media (max-width: 1100px) {
+  .cp-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* Retention Effectiveness */
+.cp-effectiveness-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cp-effectiveness-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--border-color, #e8edf3);
+  border-radius: 10px;
+  background: var(--panel-background, #fff);
+}
+
+.cp-effectiveness-card span {
+  color: #778499;
+  font-size: 12px;
+}
+
+.cp-effectiveness-card strong {
+  color: #26364d;
+  font-size: 25px;
+}
+
+.cp-effectiveness-card small {
+  color: #8793a4;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cp-overdue-card {
+  border-left: 3px solid #d49a35;
+}
+
+.cp-effectiveness-note {
+  margin: 14px 0 0;
+  color: #8793a4;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .cp-effectiveness-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .cp-effectiveness-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Period reporting and explicit customer contact logging */
+.cp-period-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 150px;
+  color: #778499;
+  font-size: 12px;
+}
+
+.cp-period-select select {
+  padding: 9px 12px;
+  border: 1px solid var(--border-color, #e8edf3);
+  border-radius: 8px;
+  background: var(--panel-background, #fff);
+  color: inherit;
+}
+
+.cp-report-subtitle {
+  margin: 18px 0 12px;
+  color: #35445a;
+  font-size: 14px;
+}
+
+.cp-report-error {
+  color: #b42318;
+  font-size: 12px;
+}
+
+.cp-team-report {
+  overflow-x: auto;
+  border: 1px solid var(--border-color, #e8edf3);
+  border-radius: 9px;
+}
+
+.cp-team-report-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(75px, 1fr));
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color, #e8edf3);
+  color: #526176;
+  font-size: 12px;
+}
+
+.cp-team-report-row:last-child {
+  border-bottom: 0;
+}
+
+.cp-team-report-header {
+  background: #f7f9fc;
+  color: #778499;
+  font-weight: 600;
+}
+
+.cp-contact-button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #245a91;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cp-contact-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+.cp-comparison {
+  color: #526b88 !important;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Keep the Action column visible */
+.cp-table th:last-child,
+.cp-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #ffffff;
+  min-width: 75px;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.04);
+}
+
+.cp-table th:last-child {
+  z-index: 3;
+}
+
+
+/* Clearly highlight the selected customer row */
+.cp-table tbody tr.cp-selected-row td {
+  background: #e8f0fe !important;
+  border-top: 1px solid #8ab4f8;
+  border-bottom: 1px solid #8ab4f8;
+}
+
+.cp-table tbody tr.cp-selected-row td:first-child {
+  box-shadow: inset 4px 0 0 #2563eb;
+}
+
+/* Explicit row-level edit action */
+.cp-edit-button {
+  padding: 6px 12px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cp-edit-button:hover {
+  background: #1d4ed8;
+}
+
+/* Explanation of engagement scoring and retention priority */
+.cp-priority-guide {
+  margin: 0 0 17px;
+  border: 1px solid var(--border-color, #e1e8f0);
+  border-radius: 9px;
+  background: var(--panel-background, #fff);
+  color: var(--text-primary, #26364d);
+}
+
+.cp-priority-guide summary {
+  padding: 13px 15px;
+  cursor: pointer;
+  color: #315b91;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cp-guide-content {
+  padding: 0 15px 15px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-primary, #26364d);
+}
+
+.cp-guide-content h3 {
+  margin: 17px 0 8px;
+  font-size: 13px;
+}
+
+.cp-guide-content p { margin: 8px 0; }
+
+.cp-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cp-guide-grid > div {
+  padding: 12px;
+  border: 1px solid var(--border-color, #e8edf3);
+  border-radius: 8px;
+}
+
+.cp-guide-grid ul,
+.cp-guide-content > ul {
+  margin: 7px 0;
+  padding-left: 18px;
+}
+
+.cp-guide-note {
+  color: #778499;
+  font-size: 11px;
+}
+
+.cp-guide-table-wrap { overflow-x: auto; }
+
+.cp-guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.cp-guide-table th,
+.cp-guide-table td {
+  padding: 9px 10px;
+  border: 1px solid var(--border-color, #e8edf3);
+}
+
+.cp-guide-table thead th {
+  background: var(--panel-background, #f4f7fb);
+  color: #778499;
+}
+
+@media (max-width: 700px) {
+  .cp-guide-grid { grid-template-columns: 1fr; }
+}
