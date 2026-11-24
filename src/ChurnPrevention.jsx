@@ -30,6 +30,131 @@ const teamOptions = [
   "Retention Management",
 ];
 
+const RECORDS_STORAGE_KEY = "sedad.churnPrevention.records.v1";
+const ACTIVITIES_STORAGE_KEY = "sedad.churnPrevention.activities.v1";
+
+function readLocalData(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getPeriodStart(date, period) {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+
+  if (period === "daily") return start;
+
+  if (period === "weekly") {
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    return start;
+  }
+
+  start.setDate(1);
+  return start;
+}
+
+function buildActivityReport(base, activities, period) {
+  const now = new Date();
+  const currentStart = getPeriodStart(now, period);
+  const previousStart = new Date(currentStart);
+
+  if (period === "daily") previousStart.setDate(previousStart.getDate() - 1);
+  if (period === "weekly") previousStart.setDate(previousStart.getDate() - 7);
+  if (period === "monthly") previousStart.setMonth(previousStart.getMonth() - 1);
+
+  const inRange = (activity, start, end) => {
+    const time = new Date(activity.timestamp).getTime();
+    return Number.isFinite(time) && time >= start.getTime() && time < end.getTime();
+  };
+
+  const current = activities.filter((item) => inRange(item, currentStart, now));
+  const previous = activities.filter((item) => inRange(item, previousStart, currentStart));
+
+  const metrics = ["total_events", "actions_created", "customer_contacts", "successful_outcomes", "unsuccessful_outcomes"];
+  const baseTotals = base?.totals || {};
+  const baseComparison = base?.comparison || {};
+  const totals = {};
+  const comparison = {};
+
+  function count(items, key) {
+    if (key === "total_events") return items.length;
+    if (key === "actions_created") return items.filter((item) => item.type === "action_updated").length;
+    if (key === "customer_contacts") return items.filter((item) => item.type === "customer_contact").length;
+    if (key === "successful_outcomes") {
+      return items.filter((item) => item.type === "action_updated" &&
+        item.previous_status !== item.status &&
+        item.status === "Erfolgreich zurückgewonnen").length;
+    }
+    if (key === "unsuccessful_outcomes") {
+      return items.filter((item) => item.type === "action_updated" &&
+        item.previous_status !== item.status &&
+        item.status === "Nicht zurückgewonnen").length;
+    }
+    return 0;
+  }
+
+  for (const key of metrics) {
+    const baseCurrent = Number(baseComparison[key]?.current ?? baseTotals[key] ?? 0) || 0;
+    const basePrevious = Number(baseComparison[key]?.previous ?? 0) || 0;
+    const currentValue = baseCurrent + count(current, key);
+    const previousValue = basePrevious + count(previous, key);
+    const change = currentValue - previousValue;
+
+    totals[key] = currentValue;
+    comparison[key] = {
+      current: currentValue,
+      previous: previousValue,
+      change,
+      change_percent: previousValue === 0 ? null : Math.round((change / previousValue) * 100),
+    };
+  }
+
+  const teams = new Map();
+
+  for (const team of base?.team_performance || []) {
+    teams.set(team.team_name, {
+      team_name: team.team_name,
+      recorded_events: Number(team.recorded_events) || 0,
+      customer_contacts: Number(team.customer_contacts) || 0,
+      successful_outcomes: Number(team.successful_outcomes) || 0,
+    });
+  }
+
+  for (const item of current) {
+    const name = item.team || "Unassigned";
+    if (!teams.has(name)) {
+      teams.set(name, {
+        team_name: name,
+        recorded_events: 0,
+        customer_contacts: 0,
+        successful_outcomes: 0,
+      });
+    }
+
+    const team = teams.get(name);
+    team.recorded_events += 1;
+    if (item.type === "customer_contact") team.customer_contacts += 1;
+    if (item.type === "action_updated" &&
+        item.previous_status !== item.status &&
+        item.status === "Erfolgreich zurückgewonnen") {
+      team.successful_outcomes += 1;
+    }
+  }
+
+  return {
+    ...base,
+    totals,
+    comparison,
+    team_performance: Array.from(teams.values()).filter((team) =>
+      team.recorded_events || team.customer_contacts || team.successful_outcomes
+    ),
+  };
+}
+
 function formatComparison(item, period, t) {
   if (!item) return t.comparisonUnavailable;
   const change = Number(item.change || 0);
@@ -92,6 +217,9 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoggingContact, setIsLoggingContact] = useState(false);
   const [activityReport, setActivityReport] = useState(null);
+  const [activityEvents, setActivityEvents] = useState(() =>
+    readLocalData(ACTIVITIES_STORAGE_KEY, [])
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -117,7 +245,10 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
           };
         }
 
-        if (!cancelled) setRecords(loadedRecords);
+        if (!cancelled) {
+          const savedRecords = readLocalData(RECORDS_STORAGE_KEY, {});
+          setRecords({ ...loadedRecords, ...savedRecords });
+        }
       } catch (err) {
         if (!cancelled) setActionsError(err.message || "Demo data could not be loaded.");
       } finally {
@@ -128,6 +259,23 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
     loadActions();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (actionsLoading) return;
+    try {
+      localStorage.setItem(RECORDS_STORAGE_KEY, JSON.stringify(records));
+    } catch (err) {
+      setSaveMessage("Could not save data in this browser. Storage may be full.");
+    }
+  }, [records, actionsLoading]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(activityEvents));
+    } catch (err) {
+      setReportError("Could not save activity history in this browser. Storage may be full.");
+    }
+  }, [activityEvents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -197,17 +345,31 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
     setIsSaving(true);
     setSaveMessage("");
 
-    // Demo: Änderungen bleiben nur im React-Zustand und werden
-    // beim Neuladen der Seite automatisch zurückgesetzt.
+    const previousRecord = records[selectedId] || {};
+    const savedRecord = { ...selectedRecord };
+
     setRecords((current) => ({
       ...current,
-      [selectedId]: { ...selectedRecord },
+      [selectedId]: savedRecord,
     }));
+
+    setActivityEvents((current) => [
+      ...current,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        type: "action_updated",
+        timestamp: new Date().toISOString(),
+        customer_id: selectedId,
+        team: savedRecord.assignedTeam || "",
+        previous_status: previousRecord.status || "Offen",
+        status: savedRecord.status || "Offen",
+      },
+    ]);
 
     setSaveMessage(
       language === "fr"
-        ? "Modifications enregistrées dans cette démo (non permanentes)."
-        : "Changes saved in this demo (not permanent)."
+        ? "Modifications enregistrées dans ce navigateur."
+        : "Changes saved in this browser."
     );
     setIsSaving(false);
   }
@@ -228,32 +390,29 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
       ? "Kontakt aufgenommen"
       : record.status;
 
+    const updatedRecord = { ...record, status: nextStatus };
+
     setRecords((current) => ({
       ...current,
-      [selectedId]: {
-        ...record,
-        status: nextStatus,
-      },
+      [selectedId]: updatedRecord,
     }));
 
-    // Die Kontaktzahl wird nur in der aktuellen Demo-Sitzung erhöht.
-    setActivityReport((current) => {
-      if (!current) return current;
-
-      return {
-        ...current,
-        totals: {
-          ...current.totals,
-          total_events: (Number(current.totals?.total_events) || 0) + 1,
-          customer_contacts: (Number(current.totals?.customer_contacts) || 0) + 1,
-        },
-      };
-    });
+    setActivityEvents((current) => [
+      ...current,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        type: "customer_contact",
+        timestamp: new Date().toISOString(),
+        customer_id: selectedId,
+        team: updatedRecord.assignedTeam || "",
+        status: nextStatus,
+      },
+    ]);
 
     setSaveMessage(
       language === "fr"
-        ? "Contact client simulé dans cette démo."
-        : "Customer contact simulated in this demo."
+        ? "Contact client enregistré dans ce navigateur."
+        : "Customer contact saved in this browser."
     );
     setIsLoggingContact(false);
   }
@@ -271,6 +430,11 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
     recovered: Object.values(records).filter((r) => r.status === "Erfolgreich zurückgewonnen").length,
   };
 
+  const report = useMemo(
+    () => buildActivityReport(activityReport, activityEvents, retentionPeriod),
+    [activityReport, activityEvents, retentionPeriod]
+  );
+
   if (loading || actionsLoading) {
     return <div className="cp-message">{t.loadingChurn}</div>;
   }
@@ -278,7 +442,6 @@ function ChurnPrevention({ churnData, loading, error, language = "en" }) {
   if (error) return <div className="cp-message cp-error">{error}</div>;
   if (actionsError) return <div className="cp-message cp-error">{actionsError}</div>;
 
-  const report = activityReport;
   const visibleCustomers = filteredCustomers.slice(0, 200);
 
   return (
